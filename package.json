@@ -8,5 +8,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShaielMP/React.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ShaielMP/React/issues"
+  },
+  "homepage": "https://github.com/ShaielMP/React#readme"
 }
