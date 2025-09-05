@@ -1,0 +1,70 @@
+.sg-followCard {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: .8rem;
+  justify-content: space-between;
+}
+
+.sg-followCard-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sg-followCard-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sg-followCard-username {
+  opacity: .6;
+}
+
+.sg-followCard-avatar {
+  border-radius: 1000px;
+  width: 48px;
+  height: 48px;
+}
+
+.sg-followCard-button {
+  margin-left: 16px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sg-followCard-button.is-following{
+  border: 1px solid rgb(255, 255, 255);
+  background: #222;
+  color: #fff;
+}
+
+.sg-followCard-stopFollow {
+  display: none;
+}
+
+.sg-followCard-button:hover {
+  background-color: #cecece;
+  transition: .3s ease background-color;
+}
+
+.sg-followCard-text {
+  display: block;
+}
+
+.sg-followCard-button.is-following:hover {
+  background: rgba(255, 0, 0, 0.171);
+  border: 1px solid red;
+  color: red;
+}
+
+.sg-followCard-button.is-following:hover .sg-followCard-text{
+  display: none;
+}
+
+.sg-followCard-button.is-following:hover .sg-followCard-stopFollow{
+  display: block;
+}
