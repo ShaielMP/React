@@ -4,7 +4,7 @@ export function TwitterFollowCard({ username = 'unknown', children}) {
     const [isFollowing, setIsFollowing] = useState(false)
 
     
-    const text = isFollowing ? 'Siguiendo' : 'Seguir'
+    const text = isFollowing ? 'Following' : 'Follow'
     const buttonClassName = isFollowing ? 'sg-followCard-button is-following' : 'sg-followCard-button'
     
     const handleClick = () => {
@@ -24,7 +24,7 @@ export function TwitterFollowCard({ username = 'unknown', children}) {
             <aside>
                 <button className={buttonClassName} onClick={handleClick}>
                     <span className='sg-followCard-text'>{text}</span>
-                    <span className='sg-followCard-stopFollow'>Dejar de seguir</span>
+                    <span className='sg-followCard-stopFollow'>Unfollow</span>
                 </button>
             </aside>
         </article>
