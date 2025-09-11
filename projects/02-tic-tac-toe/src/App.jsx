@@ -12,11 +12,13 @@ import { Board } from './components/Board'
 function App() {
   // Tablero 
   const [board, setBoard] = useState(() => {
+    // Obtener el tablero del localStorage si existe
     const boardFromStorage = window.localStorage.getItem('board')
     return boardFromStorage ? JSON.parse(boardFromStorage) :Array(9).fill(null)
   })
 
   const [turn, setTurn] = useState(() => {
+    // Obtener el turno del localStorage si existe
     const turnFromStorage = window.localStorage.getItem('turn')
     return turnFromStorage ? turnFromStorage : turns.X
   })
@@ -28,6 +30,7 @@ function App() {
     setTurn(turns.X)
     setWinner(null)
 
+    // Limpiar el localStorage si existe
     window.localStorage.removeItem('board')
     window.localStorage.removeItem('turn')
   }
