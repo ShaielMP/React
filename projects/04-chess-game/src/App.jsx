@@ -61,17 +61,51 @@ function App() {
   const [turn, setTurn] = useState('white')
   const [selectedSquare, setSelectedSquare] = useState(null)
 
+  const movePiece = (fromRow, fromCol, toRow, toCol) => {
+    //Crear una copia del tablero
+    const newBoard = board.map(row => [...row])
+
+    //Obtener la pieza que se va a mover
+    const piece = newBoard[fromRow][fromCol]
+
+    //Mover la pieza
+    newBoard[toRow][toCol] = piece      // Colocar en destino
+    newBoard[fromRow][fromCol] = null   // Quitar del origen
+
+    // Actualizar el tablero
+    setBoard(newBoard)
+
+    // Cambiar turno
+    setTurn(turn === 'white' ? 'black' : 'white')
+
+    console.log(`Pieza movida! Ahora es turno de: ${turn === 'white' ? 'black' : 'white'}` )
+  }
+
   // Funcion para manejar el clic en una casilla
   const handleSquareClick = (row, col) => {
     const clickedPiece = board[row][col]
 
     if (!selectedSquare) {
+      // Solo permitir seleccionar si hay una pieza en la casilla
       if (clickedPiece) {
         console.log(`Seleccionando pieza en la casilla (${row}, ${col})`, clickedPiece)
         setSelectedSquare({ row, col })
       }
     } else {
-      console.log(`Ya hay una pieza seleccionada, intentando mover...`)
+      // Ya hay algo seleccionado, intentar mover
+      const fromRow = selectedSquare.row
+      const fromCol = selectedSquare.col
+
+      // Si hace click en la misma casilla, deseleccionar
+      if (fromRow === row && fromCol === col) {
+        console.log(`Deseleccionando pieza`)
+        setSelectedSquare(null)
+        return
+      }
+
+      // Mover la pieza
+      console.log(`Moviendo pieza de la casilla (${fromRow}, ${fromCol}) a la casilla (${row}, ${col})`)
+      movePiece(fromRow, fromCol, row, col)
       setSelectedSquare(null)
     }
   }
@@ -79,7 +113,12 @@ function App() {
   // Crea una casilla con coordenadas
   const renderSquare = (row, col) => {
     const isLight = (row + col) % 2 === 0
-    const squareClass = isLight ? 'square light' : 'square dark'
+    let squareClass = isLight ? 'square light' : 'square dark'
+    
+    if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+      squareClass += ' selected'
+    }
+    
     const piece = board[row][col] // Obtiene la pieza en la casilla
 
     return (
