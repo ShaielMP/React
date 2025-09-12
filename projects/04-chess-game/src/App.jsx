@@ -4,20 +4,20 @@ import './App.css'
 function App() {
   const pieces = {
     white: {
-      king: '♔',
-      queen: '♕',
-      rook: '♖',
-      bishop: '♗',
-      knight: '♘',
-      pawn: '♙',
+      king: {symbol: '♔', color: 'white', type: 'king'},
+      queen: {symbol: '♕', color: 'white', type: 'queen'},
+      rook: {symbol: '♖', color: 'white', type: 'rook'},
+      bishop: {symbol: '♗', color: 'white', type: 'bishop'},
+      knight: {symbol: '♘', color: 'white', type: 'knight'},
+      pawn: {symbol: '♙', color: 'white', type: 'pawn'},
     },
     black: {
-      king: '♚',
-      queen: '♛',
-      rook: '♜',
-      bishop: '♝',
-      knight: '♞',
-      pawn: '♟',
+      king: {symbol: '♚', color: 'black', type: 'king'},
+      queen: {symbol: '♛', color: 'black', type: 'queen'},
+      rook: {symbol: '♜', color: 'black', type: 'rook'},
+      bishop: {symbol: '♝', color: 'black', type: 'bishop'},
+      knight: {symbol: '♞', color: 'black', type: 'knight'},
+      pawn: {symbol: '♟', color: 'black', type: 'pawn'},
     },
   }
 
@@ -86,10 +86,12 @@ function App() {
     const clickedPiece = board[row][col]
 
     if (!selectedSquare) {
-      // Solo permitir seleccionar si hay una pieza en la casilla
-      if (clickedPiece) {
-        console.log(`Seleccionando pieza en la casilla (${row}, ${col})`, clickedPiece)
+      // Verificar que hay pieza Y que es del jugador actual
+      if (clickedPiece && clickedPiece.color === turn) {
+        console.log(`Seleccionando pieza ${clickedPiece.type} ${clickedPiece.color}`)
         setSelectedSquare({ row, col })
+      } else if (clickedPiece && clickedPiece.color !== turn) {
+        console.log(`No puedes mover piezas de color ${clickedPiece.color}, es turno de ${turn}`)
       }
     } else {
       // Ya hay algo seleccionado, intentar mover
@@ -100,6 +102,13 @@ function App() {
       if (fromRow === row && fromCol === col) {
         console.log(`Deseleccionando pieza`)
         setSelectedSquare(null)
+        return
+      }
+
+      // Verificar que no intenta capturar pieza propia
+      if (clickedPiece && clickedPiece.color === turn) {
+        console.log('Cambiando selección a otra pieza propia')
+        setSelectedSquare({ row, col })
         return
       }
 
@@ -128,7 +137,7 @@ function App() {
         className={squareClass}
         onClick={() => handleSquareClick(row, col)}
       >
-        {piece}
+        {piece ? piece.symbol : ''}
       </div>
     )
   }
@@ -147,7 +156,12 @@ function App() {
   return (
     <div>
       <h1>Chess Game</h1>
-      <h3>Turn: {turn === 'white' ? 'White' : 'Black'}</h3>
+      <div className='turn-info'>
+        <p>Turno: <span className={turn === 'white' ? 'white-turn' : 'black-turn'}>
+          {turn === 'white' ? 'Blancas ♔' : 'Negras ♚'}
+          </span>
+        </p>
+      </div>
       <div className="board">
         {renderBoard()}
       </div>
