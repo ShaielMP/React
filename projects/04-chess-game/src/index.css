@@ -1,68 +1,219 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Estilos generales */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f0f0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
 }
 
+/* Contenedor principal */
+div {
+  text-align: center;
+}
+
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+/* Contenedor del tablero */
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 60px);
+  grid-template-rows: repeat(8, 60px);
+  gap: 0;
+  border: 3px solid #8b4513;
+  margin: 20px auto;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+}
+
+/* Casillas del tablero */
+.square {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.square.light {
+  background-color: #f0d9b5; /* Color claro (beige) */
+}
+
+.square.dark {
+  background-color: #b58863; /* Color oscuro (marrón) */
+}
+
+/* Efectos hover para las casillas */
+.square:hover {
+  background-color: #ffe066 !important;
+  transform: scale(1.05);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Casilla seleccionada */
+.square.selected {
+  background-color: #90ee90 !important;
+  box-shadow: inset 0 0 15px rgba(0, 100, 0, 0.5);
+}
+
+/* Casillas de movimientos válidos */
+.square.valid-move {
+  background-color: #ffeb3b !important;
+  box-shadow: inset 0 0 10px rgba(255, 193, 7, 0.7);
+}
+
+.square.valid-move::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(76, 175, 80, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Estilos para las piezas */
+.piece {
+  font-size: 2.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.piece:hover {
+  transform: scale(1.1);
+}
+
+.piece:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+/* Contenedor de piezas (si se usa por separado) */
+.pieces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* Botón de reset */
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Estados especiales del juego */
+.check {
+  background-color: #ff5722 !important;
+  animation: pulse 1s infinite;
+}
+
+.checkmate {
+  background-color: #d32f2f !important;
+  animation: flash 0.5s infinite;
+}
+
+/* Animaciones */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7);
   }
-  a:hover {
-    color: #747bff;
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 87, 34, 0);
   }
-  button {
-    background-color: #f9f9f9;
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
+  }
+}
+
+@keyframes flash {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0.5;
+  }
+}
+
+/* Información del turno */
+.turn-info {
+  margin: 20px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.turn-white {
+  color: #fff;
+  background-color: #333;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.turn-black {
+  color: #333;
+  background-color: #fff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 2px solid #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .board {
+    grid-template-columns: repeat(8, 45px);
+    grid-template-rows: repeat(8, 45px);
+  }
+  
+  .square {
+    width: 45px;
+    height: 45px;
+    font-size: 2rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  .piece {
+    font-size: 2rem;
   }
 }
