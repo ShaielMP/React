@@ -315,45 +315,51 @@ function App() {
 
     console.log(`Validando movimiento de ${piece.type}: ${fromRow}, ${fromCol} -> ${toRow}, ${toCol}`)
   
+    // Verificar reglas de la pieza
+    let moveFollowsRules = false
+  
     switch (piece.type) {
       case 'pawn':
-        return isValidPawnMove(fromRow, fromCol, toRow, toCol, piece.color)
-
+        moveFollowsRules = isValidPawnMove(fromRow, fromCol, toRow, toCol, piece.color)
+        break
       case 'rook':
-        // Torre se mueve en línea recta (horizontal o vertical)
         if (rowDiff === 0 || colDiff === 0) {
-          return isPathClear(fromRow, fromCol, toRow, toCol)
+          moveFollowsRules = isPathClear(fromRow, fromCol, toRow, toCol)
         }
-
-        return false
-
+        break
       case 'bishop':
-        // Alfil se mueve en diagonal
         if (rowDiff === colDiff) {
-          return isPathClear(fromRow, fromCol, toRow, toCol)
+          moveFollowsRules = isPathClear(fromRow, fromCol, toRow, toCol)
         }
-
-        return false
-
+        break
       case 'queen':
-        // Reina se mueve en cualquier dirección
         if (rowDiff === 0 || colDiff === 0 || rowDiff === colDiff) {
-          return isPathClear(fromRow, fromCol, toRow, toCol)
+          moveFollowsRules = isPathClear(fromRow, fromCol, toRow, toCol)
         }
-
-        return false
-
+        break
       case 'king':
-        // Rey se mueve una casilla en cualquier dirección
-        return rowDiff <= 1 && colDiff <= 1
-
+        moveFollowsRules = rowDiff <= 1 && colDiff <= 1
+        break
       case 'knight':
-        // Caballo se mueve en L (2+1 o 1+2)
-        return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)
+        moveFollowsRules = (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)
+        break
       default:
         return false
     }
+
+    if (!moveFollowsRules) {
+      console.log(`Movimiento no sigue las reglas de la pieza: ${piece.type}`)
+      return false
+    }
+
+    if (wouldLeaveKingInCheck(fromRow, fromCol, toRow, toCol)) {
+      console.log(`Movimiento rechazado por dejar al rey en check`)
+      return false
+    }
+
+    return true
   }
+
 
   // Función para encontrar el rey de un jugador
   const findKing = (color) => {
@@ -437,6 +443,130 @@ function App() {
     if (!kingPosition) return false
 
     return isSquareUnderAttack(kingPosition.row, kingPosition.col, color === 'white' ? 'black' : 'white')
+  }
+
+  const simulateMove = (fromRow, fromCol, toRow, toCol, currentBoard) => {
+    // Crear una copia del tablero
+    const simulatedBoard = currentBoard.map(row => [...row])
+
+    // Realizar el movimiento simulado
+    const piece = simulatedBoard[fromRow][fromCol]
+    simulatedBoard[fromRow][fromCol] = null
+    simulatedBoard[toRow][toCol] = piece
+
+    return simulatedBoard
+  }
+
+  // Función para verificar si una casilla está siendo atacada por una pieza
+  const isSquareUnderAttackInBoard = (row, col, attackingColor, testBoard) => {
+    for (let fromRow = 0; fromRow < 8; fromRow++) {
+      for (let fromCol = 0; fromCol < 8; fromCol++) {
+        const piece = testBoard[fromRow][fromCol]
+
+        if (piece && piece.color === attackingColor) {
+          if (canPieceAttackSquareInBoard(fromRow, fromCol, row, col, piece, testBoard)) {
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }
+
+  const canPieceAttackSquareInBoard = (fromRow, fromCol, toRow, toCol, piece, testBoard) => {
+    if (!isValidPosition(toRow, toCol)) {
+      return false
+    }
+
+    const rowDiff = Math.abs(toRow - fromRow)
+    const colDiff = Math.abs(toCol - fromCol)
+
+    switch (piece.type) {
+      case 'pawn': {
+        const direction = piece.color === 'white' ? -1 : 1
+        const actualRowDiff = toRow - fromRow
+        
+        return colDiff === 1 && actualRowDiff === direction
+      }
+        
+      case 'rook':
+        if (rowDiff === 0 || colDiff === 0) {
+          return isPathClearInBoard(fromRow, fromCol, toRow, toCol, testBoard)
+        }
+
+        return false  
+
+      case 'bishop':
+        if (rowDiff === colDiff) {
+          return isPathClearInBoard(fromRow, fromCol, toRow, toCol, testBoard)
+        }
+
+        return false
+
+      case 'queen':
+        if (rowDiff === 0 || colDiff === 0 || rowDiff === colDiff) {
+          return isPathClearInBoard(fromRow, fromCol, toRow, toCol, testBoard)
+        }
+
+        return false
+
+      case 'king':
+        return rowDiff <= 1 && colDiff <= 1
+
+      case 'knight':
+        return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)
+      
+      default:
+        return false
+    }
+  }
+
+  const isPathClearInBoard = (fromRow, fromCol, toRow, toCol, testBoard) => {
+    const rowDiff = toRow - fromRow
+    const colDiff = toCol - fromCol
+
+    const rowStep = rowDiff === 0 ? 0 : (rowDiff > 0 ? 1 : -1)
+    const colStep = colDiff === 0 ? 0 : (colDiff > 0 ? 1 : -1)
+
+    let currentRow = fromRow + rowStep
+    let currentCol = fromCol + colStep
+
+    while (currentRow !== toRow || currentCol !== toCol) {
+      if (testBoard[currentRow][currentCol] !== null) {
+        return false
+      }
+
+      currentRow += rowStep
+      currentCol += colStep
+    }
+
+    return true
+  }
+
+  const findKingInBoard = (color, testBoard) => {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = testBoard[row][col]
+        if (piece && piece.type === 'king' && piece.color === color) {
+          return { row, col }
+        }
+      }
+    }
+    return null
+  }
+
+  const wouldLeaveKingInCheck = (fromRow, fromCol, toRow, toCol) => {
+    const piece = board[fromRow][fromCol]
+
+    if (!piece) return true
+
+    const simulatedBoard = simulateMove(fromRow, fromCol, toRow, toCol, board)
+    const kingPosition = findKingInBoard(piece.color, simulatedBoard)
+
+    if (!kingPosition) return true
+
+    const enemyColor = piece.color === 'white' ? 'black' : 'white'
+    return isSquareUnderAttackInBoard(kingPosition.row, kingPosition.col, enemyColor, simulatedBoard)
   }
 
   return (
