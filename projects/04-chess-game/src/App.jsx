@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
@@ -64,6 +64,22 @@ function App() {
   const [capturedWhite, setCapturedWhite] = useState([])
   const [capturedBlack, setCapturedBlack] = useState([])
 
+  const [check, setCheck] = useState({ white: false, black: false })
+
+  // Verificar jaque después de cada cambio en el tablero
+  useEffect(() => {
+    const whiteInCheck = isInCheck('white')
+    const blackInCheck = isInCheck('black')
+
+    setCheck({ white: whiteInCheck, black: blackInCheck })
+
+    if (whiteInCheck) {
+      console.log('El blanco esta en check')
+    } else if (blackInCheck) {
+      console.log('El negro esta en check')
+    }
+  }, [board])
+
   const movePiece = (fromRow, fromCol, toRow, toCol) => {
     //Crear una copia del tablero
     const newBoard = board.map(row => [...row])
@@ -91,9 +107,10 @@ function App() {
     setBoard(newBoard)
 
     // Cambiar turno
-    setTurn(turn === 'white' ? 'black' : 'white')
+    const nextTurn =turn === 'white' ? 'black' : 'white'
+    setTurn(nextTurn)
 
-    console.log(`Pieza movida! Ahora es turno de: ${turn === 'white' ? 'black' : 'white'}` )
+    console.log(`Pieza movida! Ahora es turno de: ${nextTurn}` )
   }
 
   // Funcion para manejar el clic en una casilla
@@ -337,7 +354,90 @@ function App() {
         return false
     }
   }
+
+  // Función para encontrar el rey de un jugador
+  const findKing = (color) => {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col]
+        if (piece && piece.type === 'king' && piece.color === color) {
+          return { row, col }
+        }
+      }
+    }
+    return null
+  }
     
+  const isSquareUnderAttack = (row, col, attackingColor) => {
+    // Revisar todas las casillas del tablero
+    for (let fromRow = 0; fromRow < 8; fromRow++) {
+      for (let fromCol = 0; fromCol < 8; fromCol++) {
+        const piece = board[fromRow][fromCol]
+
+        if (piece && piece.color === attackingColor) {
+          if (canPieceAttackSquare(fromRow, fromCol, row, col, piece)) {
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }
+
+  const canPieceAttackSquare = (fromRow, fromCol, toRow, toCol, piece) => {
+    if (!isValidPosition(toRow, toCol)) {
+      return false
+    }
+
+    const rowDiff = Math.abs(toRow - fromRow)
+    const colDiff = Math.abs(toCol - fromCol)
+
+    switch (piece.type) {
+      case 'pawn': {
+        const direction = piece.color === 'white' ? -1 : 1
+        const actualRowDiff = toRow - fromRow
+        
+        return colDiff === 1 && actualRowDiff === direction
+      }
+        
+      case 'rook':
+        if (rowDiff === 0 || colDiff === 0) {
+          return isPathClear(fromRow, fromCol, toRow, toCol)
+        }
+
+        return false
+
+      case 'bishop':
+        if (rowDiff === colDiff) {
+          return isPathClear(fromRow, fromCol, toRow, toCol)
+        }
+
+        return false
+
+      case 'queen':
+        if (rowDiff === 0 || colDiff === 0 || rowDiff === colDiff) {
+          return isPathClear(fromRow, fromCol, toRow, toCol)
+        }
+
+        return false
+
+      case 'king':
+        return rowDiff <= 1 && colDiff <= 1
+
+      case 'knight':
+        return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)
+      
+        default:
+        return false
+    }
+  }
+
+  const isInCheck = (color) => {
+    const kingPosition = findKing(color)
+    if (!kingPosition) return false
+
+    return isSquareUnderAttack(kingPosition.row, kingPosition.col, color === 'white' ? 'black' : 'white')
+  }
 
   return (
     <div>
@@ -345,6 +445,7 @@ function App() {
       <div className='turn-info'>
         <p>Turno: <span className={turn === 'white' ? 'white-turn' : 'black-turn'}>
           {turn === 'white' ? 'Blancas ♔' : 'Negras ♚'}
+            {check[turn] && '¡EN JAQUE!'}
           </span>
         </p>
       </div>
