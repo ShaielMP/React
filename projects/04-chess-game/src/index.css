@@ -107,7 +107,6 @@ h1 {
   transform: scale(0.95);
 }
 
-/* Contenedor de piezas (si se usa por separado) */
 .pieces {
   display: flex;
   flex-wrap: wrap;
@@ -153,6 +152,7 @@ h1 {
 
 /* Botón de reset */
 button {
+  margin: 1rem;
   background-color: #4caf50;
   color: white;
   border: none;
@@ -182,30 +182,49 @@ button:active {
   animation: pulse 1s infinite;
 }
 
-.checkmate {
-  background-color: #d32f2f !important;
-  animation: flash 0.5s infinite;
+.game-over {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  animation: gameOverAnimation 1s ease-in;
 }
 
-/* Animaciones */
-@keyframes pulse {
+.game-over.checkmate {
+  background-color: #ffebee;
+  border: 3px solid #d32f2f;
+  color: #d32f2f;
+}
+
+.game-over.stalemate {
+  background-color: #fff3e0;
+  border: 3px solid #f57c00;
+  color: #f57c00;
+}
+
+.game-over h2 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-over p {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+@keyframes gameOverAnimation {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7);
+    transform: scale(0.8);
+    opacity: 0;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 87, 34, 0);
+  50% {
+    transform: scale(1.1);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
-  }
-}
-
-@keyframes flash {
-  0%, 50%, 100% {
+    transform: scale(1);
     opacity: 1;
-  }
-  25%, 75% {
-    opacity: 0.5;
   }
 }
 
